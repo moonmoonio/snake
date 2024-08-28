@@ -17,33 +17,24 @@ var height: int = 32
 var rows: int = 20
 var columns: int = 20
 var boxes: Array[Box] = []
+var apple_timer: Timer
+var apple_timer_seconds: float = 3.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	apple_timer = Timer.new()
+	add_child(apple_timer)
 	score = 0
 	max_score = 0
 	$Player.crashed.connect(new_game)
 	$Player.eat.connect(increase_score)
-	for row in range(rows):
-		for column in range(columns):
-			boxes.push_back(Box.new(column * width, row * height, false))
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	time_passed += delta
-	if time_passed > 3:
-		spawn_apple()
-		time_passed = 0
+	apple_timer.timeout.connect(spawn_apple)
+	apple_timer.start(apple_timer_seconds)
 
 func spawn_apple():
 	var apple = apple_scene.instantiate()
-	while true:
-		var index = randi_range(0, boxes.size() - 1)
-		var box = boxes[index]
-		if !box.used:
-			apple.position = box.position
-			boxes[index].used = true
-			break
+	apple.position.x = randi_range(0, columns - 1) * width
+	apple.position.y = randi_range(0, rows - 1) * height
 	add_child(apple)
 
 func new_game():
