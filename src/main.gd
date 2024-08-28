@@ -8,6 +8,8 @@ class Box:
 		position = Vector2(x, y)
 		used = is_used
 
+var max_score: int = 0
+var score: int = 0
 var time_passed: float = 0.0
 var apple_scene = preload("res://scenes/apple.tscn")
 var width: int = 32
@@ -18,7 +20,10 @@ var boxes: Array[Box] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	score = 0
+	max_score = 0
 	$Player.crashed.connect(new_game)
+	$Player.eat.connect(increase_score)
 	for row in range(rows):
 		for column in range(columns):
 			boxes.push_back(Box.new(column * width, row * height, false))
@@ -42,5 +47,17 @@ func spawn_apple():
 	add_child(apple)
 
 func new_game():
+	score = 0
+	update_scores()
 	get_tree().call_group("apple", "queue_free")
 	$Player.start()
+
+func increase_score():
+	score += 1
+	if score > max_score:
+		max_score = score
+	update_scores()
+
+func update_scores():
+	%ScoreLabel.text = "Score: %d" % score
+	%MaxScoreLabel.text = "Maximum score: %d" % max_score

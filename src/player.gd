@@ -7,11 +7,11 @@ enum Directions {
 	RIGHT
 }
 
+signal eat
 signal crashed
 @export var step: int = 32
 @export var rows: int = 20
 @export var columns: int = 20
-var did_crash: bool = false
 var max_row: int
 var max_column: int
 var time_passed: float = 0.0
@@ -35,7 +35,6 @@ func _process(delta: float) -> void:
 		move_body()
 
 func start():
-	did_crash = false
 	time_passed = 0.0
 	direction = Directions.RIGHT
 	get_tree().call_group("body", "queue_free")
@@ -48,6 +47,7 @@ func increase_size(first: bool):
 	if first:
 		node.position = Vector2(0,0)
 		node.eat.connect(increase_size.bind(false))
+		node.eat.connect(_on_eat)
 		node.crash.connect(_on_crashed)
 	else:
 		node.position = Vector2(-32,-32)
@@ -99,6 +99,8 @@ func choose_direction():
 			return
 
 func _on_crashed():
-	if !did_crash:
-		did_crash = true
-		crashed.emit()
+	crashed.emit()
+
+func _on_eat():
+	eat.emit()
+
