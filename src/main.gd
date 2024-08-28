@@ -1,13 +1,5 @@
 extends Node2D
 
-class Box:
-	var position: Vector2
-	var used: bool
-
-	func _init(x: float, y: float, is_used: bool):
-		position = Vector2(x, y)
-		used = is_used
-
 var max_score: int = 0
 var score: int = 0
 var time_passed: float = 0.0
@@ -16,7 +8,7 @@ var width: int = 32
 var height: int = 32
 var rows: int = 20
 var columns: int = 20
-var boxes: Array[Box] = []
+var boxes: Array[Vector2] = Array([], TYPE_VECTOR2, "", null)
 var apple_timer: Timer
 var apple_timer_seconds: float = 3.0
 
@@ -30,11 +22,14 @@ func _ready() -> void:
 	$Player.eat.connect(increase_score)
 	apple_timer.timeout.connect(spawn_apple)
 	apple_timer.start(apple_timer_seconds)
+	for row in range(rows):
+		for column in range(columns):
+			boxes.push_back(Vector2(column * width, row * height))
 
 func spawn_apple():
 	var apple = apple_scene.instantiate()
-	apple.position.x = randi_range(0, columns - 1) * width
-	apple.position.y = randi_range(0, rows - 1) * height
+	var options = boxes.filter(func(pos): return !$Player.nodes.map(func(element): return element.position).has(pos))
+	apple.position = options.pick_random()
 	add_child(apple)
 
 func new_game():
